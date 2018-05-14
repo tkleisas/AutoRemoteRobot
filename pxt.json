@@ -1,0 +1,16 @@
+{
+    "name": "AutoRemoteRobot",
+    "dependencies": {
+        "core": "*",
+        "radio": "*",
+        "pxt-sonar": "github:microsoft/pxt-sonar#v0.0.4",
+        "pxt-kitronik-motor-driver": "github:kitronikltd/pxt-kitronik-motor-driver#v0.0.3",
+        "pxt-greekled-beta": "github:tkleisas/pxt-greekled-beta#v0.1.0"
+    },
+    "description": "",
+    "files": [
+        "main.blocks",
+        "main.ts",
+        "README.md"
+    ]
+}
