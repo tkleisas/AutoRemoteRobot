@@ -1,8 +1,9 @@
 let prevaction = ""
 let distance = 0
 let turn = 0
-let mode = 0
-function remoteControlled()  {
+let mode = -1
+let message = "A, B OR A+B"
+function remoteControlled() {
     if (action.length > 0 && action.compare(prevaction) == 0) {
         basic.pause(50)
         return
@@ -38,112 +39,112 @@ function remoteControlled()  {
     prevaction = action
     basic.pause(50)
 }
-function rotateLeft()  {
+function rotateLeft() {
     kitronik.motorOn(kitronik.Motors.Motor1, kitronik.MotorDirection.Reverse, speed)
-kitronik.motorOn(kitronik.Motors.Motor2, kitronik.MotorDirection.Forward, speed)
+    kitronik.motorOn(kitronik.Motors.Motor2, kitronik.MotorDirection.Forward, speed)
 }
-function stop()  {
+function stop() {
     kitronik.motorOff(kitronik.Motors.Motor1)
-kitronik.motorOff(kitronik.Motors.Motor2)
+    kitronik.motorOff(kitronik.Motors.Motor2)
 }
-function saveSettings()  {
-	
-}
-function remoteControl()  {
-    speed = input.acceleration(Dimension.Y) * 100 / 1024
+
+function remoteControl() {
+    speed = input.rotation(Rotation.Pitch);
     if (speed < 30 && speed > -30) {
         radio.sendString("stop")
         greekled.showString("S")
     } else {
         radio.sendValue("speed", speed)
     }
-    turn = input.acceleration(Dimension.X) * 180 / 1024
+    turn = input.rotation(Rotation.Roll)
+    if (turn > 70) {
+        radio.sendString("rotateright")
+        greekled.showString(">")
+
+    }
+    if (turn < -70) {
+        radio.sendString("rotateleft")
+        greekled.showString("<")
+    }
     if (speed >= 30 || speed <= -30) {
-        if (turn > -30 && turn < 30) {
-            if (speed > 0) {
-                radio.sendString("reverse")
-                greekled.showString("V")
-            } else {
-                radio.sendString("forward")
-                greekled.showString("Λ")
-            }
+        if (speed > 0) {
+            radio.sendString("reverse")
+            greekled.showString("V")
         }
-        if (turn >= 30 && turn < 90) {
+        else {
+            radio.sendString("forward")
+            greekled.showString("Λ")
+        }
+    }
+    if (speed >= 30 || speed <= -30) {
+
+        if (turn >= 30 && turn < 70) {
             radio.sendString("turnright")
             greekled.showString("R")
         }
-        if (turn >= 90) {
-            radio.sendString("rotateright")
-            greekled.showString(">")
-        }
-        if (turn < -30 && turn > -60) {
+
+        if (turn < -30 && turn > -70) {
             radio.sendString("turnleft")
             greekled.showString("L")
         }
-        if (turn <= -90) {
-            radio.sendString("rotateleft")
-            greekled.showString("<")
-        }
+
     }
-    basic.pause(100)
+    basic.pause(50)
 }
-function autonomous()  {
+function autonomous() {
     let e = readDistance(5)
-greekled.showNumber(e)
+    greekled.showNumber(e)
     if (e < 40) {
         rotateLeft()
     } else {
         moveForward()
     }
-    basic.pause(50)
+
 }
 input.onButtonPressed(Button.B, () => {
     mode = 1
     speed = 60
-    greekled.showString("ΤΗΛΕΚΑΤΕΥΘΥΝΟΜΕΝΟ")
-    basic.pause(5000)
+    message = "RX"
+    action = "stop"
+
 })
 input.onButtonPressed(Button.A, () => {
     mode = 0
     speed = 60
-    greekled.showString("ΑΥΤΟΝΟΜΗ ΛΕΙΤΟΥΡΓΙΑ")
-    basic.pause(5000)
+    message = "A"
+    action = "stop"
 })
-function loadSettings()  {
-    // mode = files.settingsReadNumber("MODE")
-    if (mode == -1) {
-        mode = 0
-    }
-}
-function steerLeft()  {
+
+function steerLeft() {
     kitronik.motorOn(kitronik.Motors.Motor1, kitronik.MotorDirection.Forward, speed / 3)
-kitronik.motorOn(kitronik.Motors.Motor2, kitronik.MotorDirection.Forward, speed)
+    kitronik.motorOn(kitronik.Motors.Motor2, kitronik.MotorDirection.Forward, speed)
 }
-function moveBackwards()  {
+function moveBackwards() {
     kitronik.motorOn(kitronik.Motors.Motor1, kitronik.MotorDirection.Reverse, Math.abs(speed))
-kitronik.motorOn(kitronik.Motors.Motor2, kitronik.MotorDirection.Reverse, Math.abs(speed))
+    kitronik.motorOn(kitronik.Motors.Motor2, kitronik.MotorDirection.Reverse, Math.abs(speed))
 }
-radio.onDataPacketReceived( ({ receivedString }) =>  {
+radio.onDataPacketReceived(({ receivedString }) => {
     if (mode == 1) {
         action = receivedString
     }
 })
-function steerRight()  {
+function steerRight() {
     kitronik.motorOn(kitronik.Motors.Motor1, kitronik.MotorDirection.Forward, speed)
-kitronik.motorOn(kitronik.Motors.Motor2, kitronik.MotorDirection.Forward, speed / 3)
+    kitronik.motorOn(kitronik.Motors.Motor2, kitronik.MotorDirection.Forward, speed / 3)
 }
-function rotateRight()  {
+function rotateRight() {
     kitronik.motorOn(kitronik.Motors.Motor1, kitronik.MotorDirection.Forward, speed)
-kitronik.motorOn(kitronik.Motors.Motor2, kitronik.MotorDirection.Reverse, speed)
+    kitronik.motorOn(kitronik.Motors.Motor2, kitronik.MotorDirection.Reverse, speed)
 }
-function moveForward()  {
+function moveForward() {
     kitronik.motorOn(kitronik.Motors.Motor1, kitronik.MotorDirection.Forward, speed)
-kitronik.motorOn(kitronik.Motors.Motor2, kitronik.MotorDirection.Forward, speed)
+    kitronik.motorOn(kitronik.Motors.Motor2, kitronik.MotorDirection.Forward, speed)
 }
 input.onButtonPressed(Button.AB, () => {
     mode = 2
     speed = 0
-    greekled.showString("ΤΗΛΕΧΕΙΡΙΣΤΗΡΙΟ")
+    message = "TX"
+    action = "stop"
 })
 let action = ""
 let speed = 0
@@ -157,10 +158,14 @@ function readDistance(numTimes: number) {
     }
     return d
 }
-loadSettings()
+
 radio.setGroup(1)
 radio.setTransmitPower(7)
 basic.forever(() => {
+    if (message.length > 1) {
+        greekled.showString(message)
+        message = ""
+    }
     if (mode == 0) {
         autonomous()
     } else if (mode == 1) {
